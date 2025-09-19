@@ -1,6 +1,5 @@
 name: Build, Push & Deploy Wisecow
 
-# Trigger workflow on push to main branch
 on:
   push:
     branches:
@@ -34,17 +33,23 @@ jobs:
         push: true
         tags: sabarisurya/wisecow:latest
 
-    # 5️⃣ Set up Kubeconfig
+    # 5️⃣ Install kubectl
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.27.4'   # You can adjust the version
+
+    # 6️⃣ Set up Kubeconfig
     - name: Set up Kubeconfig
       run: |
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config
 
-    # 6️⃣ Deploy Wisecow to Kubernetes
+    # 7️⃣ Deploy Wisecow to Kubernetes
     - name: Deploy Wisecow to Kubernetes
       run: |
         kubectl apply -f wisecow-deployment.yaml
         kubectl apply -f wisecow-service.yaml
         kubectl apply -f wisecow-ingress.yaml || true
-        # Update deployment image to latest
         kubectl set image deployment/wisecow wisecow=sabarisurya/wisecow:latest --record
