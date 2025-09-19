@@ -4,16 +4,18 @@ A Wisdom server that returns random quotes using fortune and cowsay.
 This project demonstrates Docker, Kubernetes, CI/CD (GitHub Actions), and temporary public access via ngrok.
 
 🌟 Features
-Feature	Description	Icon
-Project Overview	HTTP server on port 4499, cowsay-formatted quotes, deployable via Docker/K8s, temporary ngrok URL	📑
-Why server.js?	Browser-friendly, handles multiple connections, K8s probes compatible	💡
-Local Setup	Clone repo, install dependencies, run server locally	💻
-Docker Deployment	Build & run Docker container	🐳
-Kubernetes Deployment	Deploy on kind cluster, apply manifests, port-forward	☸️
-Temporary Public Access	Expose server with ngrok for temporary URL	🌐
-Self-Healing Demo	Delete pods & watch Kubernetes restart them automatically	🔄
-CI/CD Workflow	GitHub Actions builds Docker, deploys to kind, starts ngrok	⚙️
-Secrets	Docker Hub login, ngrok token	🔑
+| Feature                     | Description                                                                                       | Icon |
+| --------------------------- | ------------------------------------------------------------------------------------------------- | ---- |
+| **Project Overview**        | HTTP server on port 4499, cowsay-formatted quotes, deployable via Docker/K8s, temporary ngrok URL | 📑   |
+| **Why server.js?**          | Browser-friendly, handles multiple connections, K8s probes compatible                             | 💡   |
+| **Local Setup**             | Clone repo, install dependencies, run server locally                                              | 💻   |
+| **Docker Deployment**       | Build & run Docker container                                                                      | 🐳   |
+| **Kubernetes Deployment**   | Deploy on kind cluster, apply manifests, port-forward                                             | ☸️   |
+| **Temporary Public Access** | Expose server with ngrok for temporary URL                                                        | 🌐   |
+| **Self-Healing Demo**       | Delete pods & watch Kubernetes restart them automatically                                         | 🔄   |
+| **CI/CD Workflow**          | GitHub Actions builds Docker, deploys to kind, starts ngrok                                       | ⚙️   |
+| **Secrets**                 | Docker Hub login, ngrok token                                                                     | 🔑   |
+
 💡 Why server.js Instead of Shell Script
 
 Originally, a shell script (wisecow.sh) was used:
