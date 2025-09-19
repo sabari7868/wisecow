@@ -34,21 +34,3 @@ jobs:
           tags: |
             sabarisurya/wisecow:latest
             sabarisurya/wisecow:${{ github.sha }}
-
-      # 5️⃣ Deploy to Kubernetes
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
-      - name: Configure Kubeconfig
-        run: |
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
-
-      - name: Deploy Wisecow to K8s
-        run: |
-          # Replace image with newly pushed image
-          kubectl set image deployment/wisecow wisecow=sabarisurya/wisecow:latest --record
-          # Apply deployment & service if not already applied
-          kubectl apply -f wisecow-deployment.yaml
-          kubectl apply -f wisecow-service.yaml
