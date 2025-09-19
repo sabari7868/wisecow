@@ -1,4 +1,4 @@
-name: Build, Push & Deploy Wisecow
+name: Build & Deploy Wisecow
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout repository
+    # 1️⃣ Checkout the repository
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -19,37 +19,50 @@ jobs:
       uses: docker/setup-buildx-action@v3
 
     # 3️⃣ Login to Docker Hub
-    - name: Login to Docker Hub
+    - name: Docker login
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     # 4️⃣ Build and push Docker image
-    - name: Build and Push Docker image
+    - name: Build & Push Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
         push: true
         tags: sabarisurya/wisecow:latest
 
-    # 5️⃣ Install kubectl
+    # 5️⃣ Set up kind cluster
+    - name: Set up kind
+      uses: engineerd/setup-kind@v0.6.0
+      with:
+        version: v0.20.0
+
+    # 6️⃣ Load the Docker image into kind
+    - name: Load Docker image into kind
+      run: kind load docker-image sabarisurya/wisecow:latest
+
+    # 7️⃣ Install kubectl
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
       with:
         version: 'v1.27.4'
 
-    # 6️⃣ Set up Kubeconfig from Base64 secret
-    - name: Set up Kubeconfig
+    # 8️⃣ Deploy Wisecow manifests
+    - name: Deploy Wisecow
       run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
-        chmod 600 $HOME/.kube/config
-
-    # 7️⃣ Deploy Wisecow to Kubernetes
-    - name: Deploy Wisecow to Kubernetes
-      run: |
+        # Create TLS secret if your TLS files are in the repo
+        kubectl create secret tls wisecow-tls --cert=tls.crt --key=tls.key || true
+        
+        # Apply manifests
         kubectl apply -f wisecow-deployment.yaml
         kubectl apply -f wisecow-service.yaml
         kubectl apply -f wisecow-ingress.yaml || true
+
+        # Update deployment image
         kubectl set image deployment/wisecow wisecow=sabarisurya/wisecow:latest --record
+
+    # 9️⃣ Verify deployment
+    - name: Verify deployment
+      run: kubectl get pods -o wide
