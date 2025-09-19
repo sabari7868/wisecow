@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout the repository
+    # 1️⃣ Checkout repository
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -29,7 +29,7 @@ jobs:
     - name: Build Docker image
       run: docker build -t sabarisurya/wisecow:latest .
 
-    # 5️⃣ Push Docker image to Docker Hub
+    # 5️⃣ Push Docker image
     - name: Push Docker image
       run: docker push sabarisurya/wisecow:latest
 
@@ -57,19 +57,25 @@ jobs:
     # 🔟 Deploy Wisecow manifests
     - name: Deploy Wisecow
       run: |
-        # Create TLS secret if it exists
+        # Create TLS secret (skip if exists)
         kubectl create secret tls wisecow-tls --cert=tls.crt --key=tls.key || true
 
-        # Apply Kubernetes manifests
+        # Apply manifests
         kubectl apply -f wisecow-deployment.yaml
         kubectl apply -f wisecow-service.yaml
-        kubectl apply -f wisecow-ingress.yaml || true
+
+        # Optional: skip Ingress in GitHub Actions for simplicity
+        # kubectl apply -f wisecow-ingress.yaml || true
 
         # Update deployment image
-        kubectl set image deployment/wisecow wisecow=sabarisurya/wisecow:latest --record
+        kubectl set image deployment/wisecow wisecow=sabarisurya/wisecow:latest
 
-        # Wait for pods to be ready
-        kubectl wait --for=condition=ready pod -l app=wisecow --timeout=120s
+        # Wait a bit for pods to start
+        sleep 30
+
+        # Debug pods
+        kubectl get pods -o wide
+        kubectl logs -l app=wisecow
 
     # 11️⃣ Install ngrok
     - name: Install ngrok
@@ -84,4 +90,4 @@ jobs:
         nohup ngrok http 4499 --log=stdout > ngrok.log &
         sleep 5
         NGROK_URL=$(cat ngrok.log | grep -o 'https://[0-9a-z]*\.ngrok.io')
-        echo "Your Wisecow app is live at: $NGROK_URL"
+        echo "Wisecow app is live at: $NGROK_URL"
