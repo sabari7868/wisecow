@@ -1,4 +1,4 @@
-name: Build & Deploy Wisecow
+name: Build & Deploy Wisecow with ngrok
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # 4️⃣ Build Docker image locally
+    # 4️⃣ Build Docker image
     - name: Build Docker image
       run: docker build -t sabarisurya/wisecow:latest .
 
@@ -39,7 +39,7 @@ jobs:
       with:
         version: 'v1.27.4'
 
-    # 7️⃣ Install kind manually (avoids json5 errors)
+    # 7️⃣ Install kind
     - name: Install kind
       run: |
         curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
@@ -55,9 +55,9 @@ jobs:
       run: kind load docker-image sabarisurya/wisecow:latest --name wisecow-cluster
 
     # 🔟 Deploy Wisecow manifests
-    - name: Deploy Wisecow to Kubernetes
+    - name: Deploy Wisecow
       run: |
-        # Create TLS secret if not exists
+        # Create TLS secret if it exists
         kubectl create secret tls wisecow-tls --cert=tls.crt --key=tls.key || true
 
         # Apply Kubernetes manifests
@@ -68,6 +68,20 @@ jobs:
         # Update deployment image
         kubectl set image deployment/wisecow wisecow=sabarisurya/wisecow:latest --record
 
-    # 11️⃣ Verify deployment
-    - name: Verify deployment
-      run: kubectl get pods -o wide
+        # Wait for pods to be ready
+        kubectl wait --for=condition=ready pod -l app=wisecow --timeout=120s
+
+    # 11️⃣ Install ngrok
+    - name: Install ngrok
+      run: |
+        curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+        echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+        sudo apt update && sudo apt install ngrok -y
+
+    # 12️⃣ Start ngrok tunnel
+    - name: Start ngrok tunnel
+      run: |
+        nohup ngrok http 4499 --log=stdout > ngrok.log &
+        sleep 5
+        NGROK_URL=$(cat ngrok.log | grep -o 'https://[0-9a-z]*\.ngrok.io')
+        echo "Your Wisecow app is live at: $NGROK_URL"
