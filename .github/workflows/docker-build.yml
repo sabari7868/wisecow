@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
     # 1️⃣ Checkout repository
@@ -18,7 +18,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    # 3️⃣ Login to Docker Hub
+    # 3️⃣ Docker login
     - name: Docker login
       uses: docker/login-action@v3
       with:
@@ -29,7 +29,7 @@ jobs:
     - name: Build Docker image
       run: docker build -t sabarisurya/wisecow:latest .
 
-    # 5️⃣ Push Docker image
+    # 5️⃣ Push Docker image to Docker Hub
     - name: Push Docker image
       run: docker push sabarisurya/wisecow:latest
 
@@ -39,56 +39,62 @@ jobs:
       with:
         version: 'v1.27.4'
 
-    # 7️⃣ Install kind
+    # 7️⃣ Install kind (Kubernetes in Docker)
     - name: Install kind
       run: |
-        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
-        chmod +x ./kind
-        sudo mv ./kind /usr/local/bin/kind
+        curl -Lo kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+        chmod +x kind
+        sudo mv kind /usr/local/bin/kind
 
     # 8️⃣ Create kind cluster
     - name: Create kind cluster
       run: kind create cluster --name wisecow-cluster
 
     # 9️⃣ Load Docker image into kind
-    - name: Load Docker image into kind
+    - name: Load image into kind
       run: kind load docker-image sabarisurya/wisecow:latest --name wisecow-cluster
 
-    # 🔟 Deploy Wisecow manifests
-    - name: Deploy Wisecow
+    # 🔟 Deploy Wisecow app to kind cluster
+    - name: Deploy Wisecow app
       run: |
-        # Create TLS secret (skip if exists)
+        # TLS secret (skip if missing)
         kubectl create secret tls wisecow-tls --cert=tls.crt --key=tls.key || true
 
-        # Apply deployment and service
+        # Apply deployment & service
         kubectl apply -f wisecow-deployment.yaml
         kubectl apply -f wisecow-service.yaml
 
-        # Optional: skip Ingress in GitHub Actions
-        # kubectl apply -f wisecow-ingress.yaml || true
-
-        # Update deployment image
+        # Update image in deployment
         kubectl set image deployment/wisecow wisecow=sabarisurya/wisecow:latest
 
-        # Wait a bit for pods to start
+        # Wait for pods to start
         sleep 30
 
-        # Debug pods
+        # Output pod info
         kubectl get pods -o wide
-        kubectl logs -l app=wisecow
 
-    # 11️⃣ Install ngrok
+    # 1️⃣1️⃣ Install ngrok
     - name: Install ngrok
       run: |
         curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
         echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
         sudo apt update && sudo apt install ngrok -y
 
-    # 12️⃣ Start ngrok tunnel with auth token
+    # 1️⃣2️⃣ Start ngrok tunnel and expose app
     - name: Start ngrok tunnel
       run: |
         ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-        nohup ngrok http 4499 --log=stdout > ngrok.log &
+        nohup ngrok http 4499 --log=stdout > ngrok.log 2>&1 &
         sleep 10
-        NGROK_URL=$(grep -o 'https://[0-9a-z]*\.ngrok.io' ngrok.log | head -n1)
-        echo "Wisecow app is live at: $NGROK_URL"
+
+        # Extract public URL
+        NGROK_URL=$(curl -s http://127.0.0.1:4040/api/tunnels | grep -o 'https://[0-9a-z]*\.ngrok-free.app' | head -n1)
+        
+        if [ -z "$NGROK_URL" ]; then
+          echo "❌ ngrok tunnel failed to start or URL not found."
+          echo "Check ngrok.log for details:"
+          tail -n 20 ngrok.log
+          exit 1
+        else
+          echo "✅ Wisecow app is live at: $NGROK_URL"
+        fi
