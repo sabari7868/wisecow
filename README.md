@@ -3,7 +3,7 @@
 A simple Wisdom server that returns random quotes using fortune and cowsay.
 This project demonstrates Docker, Kubernetes, CI/CD (GitHub Actions), and temporary public access via ngrok.
 
-Table of Contents
+📑 Table of Contents
 
 Project Overview
 
@@ -25,43 +25,45 @@ CI/CD Workflow
 
 Secrets Required
 
-Project Overview
+🌟 Project Overview
 
-Runs a small HTTP server on port 4499.
+Runs a small HTTP server on port 4499
 
-Returns wisdom quotes formatted by cowsay.
+Returns wisdom quotes formatted by cowsay
 
-Can be deployed in Docker containers.
+Can be deployed in Docker containers
 
-Can run in Kubernetes clusters (local kind or cloud).
+Can run in Kubernetes clusters (local kind or cloud)
 
-Exposes a temporary public URL via ngrok for demonstration.
+Exposes a temporary public URL via ngrok for demonstration
 
-Why server.js Instead of Shell Script
+💡 Why server.js Instead of Shell Script
 
-Originally, a shell script was used to serve wisdom quotes. However, it had limitations:
+Originally, a shell script was used to serve wisdom quotes. It had several limitations:
 
-Not fully HTTP-compliant, so browsers could not render the output correctly.
+❌ Not fully HTTP-compliant → browsers could not render content correctly
 
-Cannot handle multiple connections efficiently.
+❌ Could not handle multiple connections efficiently
 
-Difficult to integrate with Docker or Kubernetes probes.
+❌ Difficult to integrate with Docker or Kubernetes probes
 
-The project now uses a Node.js HTTP server which:
+Solution: Use a Node.js HTTP server (server.js).
 
-Works correctly in browsers.
+✅ Benefits:
 
-Integrates seamlessly with Docker and Kubernetes probes.
+Works correctly in browsers
 
-Is simple, extendable, and maintainable.
+Integrates seamlessly with Docker/Kubernetes probes (readiness & liveness)
 
-Prerequisites
+Simple, extendable, and maintainable
+
+🛠 Prerequisites
 
 Node.js & npm
 
 Docker (for containerized deployment)
 
-kubectl (for Kubernetes)
+kubectl (for Kubernetes management)
 
 kind (for local Kubernetes cluster)
 
@@ -69,120 +71,120 @@ ngrok (for temporary public URL)
 
 GitHub account (for CI/CD workflow)
 
-Local Setup
+💻 Local Setup
 
-Clone the repository:
+Clone the repository
 
 git clone https://github.com/<username>/wisecow.git
 cd wisecow
 
 
-Install dependencies:
+Install dependencies
 
 sudo apt update
 sudo apt install nodejs npm fortune cowsay -y
 
 
-Run the server:
+Run the server
 
 node server.js
 
 
-Open browser:
+Open browser
 
 http://localhost:4499
 
-Docker Deployment
+🐳 Docker Deployment
 
-Build Docker image:
+Build Docker image
 
 docker build -t wisecow-app .
 
 
-Run container:
+Run container
 
 docker run -p 4499:4499 wisecow-app
 
 
-Open browser:
+Open browser
 
 http://localhost:4499
 
-Kubernetes Deployment
+☸️ Kubernetes Deployment
 
-Create local kind cluster:
+Create local kind cluster
 
 kind create cluster --name wisecow-cluster
 
 
-Load Docker image into cluster:
+Load Docker image into cluster
 
 kind load docker-image wisecow-app:latest --name wisecow-cluster
 
 
-Deploy Kubernetes manifests:
+Deploy Kubernetes manifests
 
 kubectl apply -f wisecow-deployment.yaml
 kubectl apply -f wisecow-service.yaml
 
 
-Forward port to local machine:
+Forward port to local machine
 
 kubectl port-forward service/wisecow-service 4499:4499
 
 
-Open browser:
+Open browser
 
 http://localhost:4499
 
-Temporary Public Access via ngrok
+🌐 Temporary Public Access via ngrok
 
-Install ngrok:
+Install ngrok
 
 sudo apt install ngrok -y
 
 
-Add your auth token:
+Add your auth token
 
 ngrok config add-authtoken <YOUR_NGROK_AUTH_TOKEN>
 
 
-Start tunnel:
+Start tunnel
 
 ngrok http 4499
 
 
-ngrok gives a temporary public URL like:
+ngrok provides a temporary public URL:
 
 https://abcd1234.ngrok-free.app
 
 
-Anyone can access the server using this URL temporarily.
+Anyone can access the server using this URL temporarily
 
-Kubernetes Self-Healing Demo
+🔄 Kubernetes Self-Healing Demo
 
-List pods:
+List pods
 
 kubectl get pods -l app=wisecow
 
 
-Delete a pod manually:
+Delete a pod manually
 
 kubectl delete pod <pod-name>
 
 
-Observe Kubernetes automatically recreates the pod:
+Observe Kubernetes recreates the pod automatically
 
 kubectl get pods -l app=wisecow -w
 
 
 Kubernetes ensures pods are restarted automatically (restartPolicy: Always).
 
-CI/CD Workflow
+⚙️ CI/CD Workflow
 
 Workflow file: .github/workflows/build-and-deploy.yml
 
-Workflow Steps:
+Steps:
 
 Checkout repository
 
@@ -202,7 +204,7 @@ Start ngrok tunnel and print temporary URL
 
 Note: GitHub Actions runners are ephemeral, so pods and ngrok URLs exist only during workflow execution.
 
-Secrets Required
+🔑 Secrets Required
 Secret Name	Purpose
 DOCKER_USERNAME	Docker Hub login
 DOCKER_PASSWORD	Docker Hub password/token
