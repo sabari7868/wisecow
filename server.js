@@ -7,7 +7,7 @@ const requestHandler = (req, res) => {
   let output;
   try {
     // Use full paths for fortune and cowsay
-    output = execSync("/usr/games/fortune | /usr/games/cowsay").toString();
+    output = "hi, hello...!" //execSync("/usr/games/fortune | /usr/games/cowsay").toString();
   } catch (err) {
     output = "Error generating wisdom!\n" + err.message;
   }
