@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout the repository
-    - name: Checkout code
+    # 1️⃣ Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v3
 
     # 2️⃣ Set up Docker Buildx
@@ -25,7 +25,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # 4️⃣ Build and push Docker image
+    # 4️⃣ Build & Push Docker image
     - name: Build & Push Docker image
       uses: docker/build-push-action@v5
       with:
@@ -33,36 +33,41 @@ jobs:
         push: true
         tags: sabarisurya/wisecow:latest
 
-    # 5️⃣ Set up kind cluster
-    - name: Set up kind
-      uses: engineerd/setup-kind@v0.6.0
-      with:
-        version: v0.20.0
-
-    # 6️⃣ Load the Docker image into kind
-    - name: Load Docker image into kind
-      run: kind load docker-image sabarisurya/wisecow:latest
-
-    # 7️⃣ Install kubectl
+    # 5️⃣ Install kubectl
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
       with:
         version: 'v1.27.4'
 
-    # 8️⃣ Deploy Wisecow manifests
-    - name: Deploy Wisecow
+    # 6️⃣ Install kind manually (avoids json5 errors)
+    - name: Install kind
       run: |
-        # Create TLS secret if your TLS files are in the repo
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+        chmod +x ./kind
+        sudo mv ./kind /usr/local/bin/kind
+
+    # 7️⃣ Create kind cluster
+    - name: Create kind cluster
+      run: kind create cluster --name wisecow-cluster
+
+    # 8️⃣ Load Docker image into kind
+    - name: Load Docker image into kind
+      run: kind load docker-image sabarisurya/wisecow:latest --name wisecow-cluster
+
+    # 9️⃣ Deploy Wisecow to Kubernetes
+    - name: Deploy Wisecow manifests
+      run: |
+        # Create TLS secret if not exists
         kubectl create secret tls wisecow-tls --cert=tls.crt --key=tls.key || true
         
         # Apply manifests
         kubectl apply -f wisecow-deployment.yaml
         kubectl apply -f wisecow-service.yaml
         kubectl apply -f wisecow-ingress.yaml || true
-
+        
         # Update deployment image
         kubectl set image deployment/wisecow wisecow=sabarisurya/wisecow:latest --record
 
-    # 9️⃣ Verify deployment
+    # 🔟 Verify deployment
     - name: Verify deployment
       run: kubectl get pods -o wide
