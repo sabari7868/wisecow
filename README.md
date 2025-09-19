@@ -1,77 +1,60 @@
-🐄 Wisecow App
+# 🐄 Wisecow App
 
-A Wisdom server that returns random quotes using fortune and cowsay.
-This project demonstrates Docker, Kubernetes, CI/CD (GitHub Actions), and temporary public access via ngrok.
+A Wisdom server that returns random quotes using **fortune** and **cowsay**.  
+This project demonstrates **Docker**, **Kubernetes**, **CI/CD (GitHub Actions)**, and **temporary public access via ngrok**.
 
-📑 Table of Contents
+---
 
-Project Overview
+## 🌟 Features
 
-Why server.js Instead of Shell Script
+| Feature | Description | Icon |
+|---------|-------------|------|
+| Project Overview | HTTP server on port 4499, cowsay-formatted quotes, deployable via Docker/K8s, temporary ngrok URL | 📑 |
+| Why server.js? | Browser-friendly, handles multiple connections, K8s probes compatible | 💡 |
+| Local Setup | Clone repo, install dependencies, run server locally | 💻 |
+| Docker Deployment | Build & run Docker container | 🐳 |
+| Kubernetes Deployment | Deploy on kind cluster, apply manifests, port-forward | ☸️ |
+| Temporary Public Access | Expose server with ngrok for temporary URL | 🌐 |
+| Self-Healing Demo | Delete pods & watch Kubernetes restart them automatically | 🔄 |
+| CI/CD Workflow | GitHub Actions builds Docker, deploys to kind, starts ngrok | ⚙️ |
+| Secrets | Docker Hub login, ngrok token | 🔑 |
 
-Prerequisites
+---
 
-Local Setup
+## 💡 Why server.js Instead of Shell Script
 
-Docker Deployment
+Originally, a shell script (`wisecow.sh`) was used:
 
-Kubernetes Deployment
+❌ **Limitations**:
+- Not fully HTTP-compliant → browsers couldn’t render correctly  
+- Cannot handle multiple connections efficiently  
+- Difficult to integrate with Docker/K8s probes  
 
-Temporary Public Access via ngrok
+✅ **Benefits of Node.js HTTP server**:
+- Works perfectly in browsers  
+- Compatible with readinessProbe & livenessProbe  
+- Simple, extendable, and maintainable  
 
-Kubernetes Self-Healing Demo
+---
 
-CI/CD Workflow
+## 🛠 Prerequisites
 
-Secrets Required
+- Node.js & npm  
+- Docker  
+- kubectl  
+- kind (local Kubernetes cluster)  
+- ngrok (temporary public URL)  
+- GitHub account (for CI/CD)  
 
-🌟 Project Overview
+---
 
-Runs a small HTTP server on port 4499
+## 💻 Local Setup
 
-Returns wisdom quotes formatted by cowsay
+<details>
+<summary>Click to expand</summary>
 
-Deployable in Docker containers or Kubernetes clusters
-
-Provides a temporary public URL via ngrok for demonstration
-
-💡 Why server.js Instead of Shell Script
-
-Originally, a shell script (wisecow.sh) was used:
-
-❌ Limitations:
-
-Not fully HTTP-compliant → browsers could not render correctly
-
-Cannot handle multiple connections efficiently
-
-Difficult to integrate with Docker/Kubernetes probes
-
-✅ Benefits of Node.js HTTP server (server.js):
-
-Works perfectly in browsers
-
-Compatible with readinessProbe & livenessProbe
-
-Simple, extendable, and maintainable
-
-🛠 Prerequisites
-
-Node.js & npm
-
-Docker
-
-kubectl
-
-kind (local Kubernetes cluster)
-
-ngrok (temporary public URL)
-
-GitHub account (for CI/CD)
-
-💻 Local Setup
-<details> <summary>Click to expand</summary>
-# Clone the repository
+```bash
+# Clone repository
 git clone https://github.com/<username>/wisecow.git
 cd wisecow
 
@@ -84,10 +67,11 @@ node server.js
 
 # Open browser
 http://localhost:4499
-
 </details>
 🐳 Docker Deployment
 <details> <summary>Click to expand</summary>
+bash
+Copy code
 # Build Docker image
 docker build -t wisecow-app .
 
@@ -96,10 +80,11 @@ docker run -p 4499:4499 wisecow-app
 
 # Open browser
 http://localhost:4499
-
 </details>
 ☸️ Kubernetes Deployment
 <details> <summary>Click to expand</summary>
+bash
+Copy code
 # Create kind cluster
 kind create cluster --name wisecow-cluster
 
@@ -115,10 +100,11 @@ kubectl port-forward service/wisecow-service 4499:4499
 
 # Open browser
 http://localhost:4499
-
 </details>
 🌐 Temporary Public Access via ngrok
 <details> <summary>Click to expand</summary>
+bash
+Copy code
 # Install ngrok
 sudo apt install ngrok -y
 
@@ -127,16 +113,15 @@ ngrok config add-authtoken <YOUR_NGROK_AUTH_TOKEN>
 
 # Start tunnel
 ngrok http 4499
-
-
 ngrok will provide a temporary public URL, e.g.:
 https://abcd1234.ngrok-free.app
-
 Anyone can access your server temporarily.
 
 </details>
 🔄 Kubernetes Self-Healing Demo
 <details> <summary>Click to expand</summary>
+bash
+Copy code
 # List pods
 kubectl get pods -l app=wisecow
 
@@ -145,13 +130,10 @@ kubectl delete pod <pod-name>
 
 # Observe automatic recreation
 kubectl get pods -l app=wisecow -w
-
-
 Kubernetes ensures pods are restarted automatically (restartPolicy: Always).
 
 </details>
 ⚙️ CI/CD Workflow
-
 Workflow file: .github/workflows/build-and-deploy.yml
 
 Steps:
