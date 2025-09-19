@@ -37,9 +37,9 @@ jobs:
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
       with:
-        version: 'v1.27.4'   # You can adjust the version
+        version: 'v1.27.4'
 
-    # 6️⃣ Set up Kubeconfig
+    # 6️⃣ Set up Kubeconfig from Base64 secret
     - name: Set up Kubeconfig
       run: |
         mkdir -p $HOME/.kube
