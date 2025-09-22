@@ -2,7 +2,8 @@
 
 A Wisdom server that returns random quotes using fortune and cowsay. This project demonstrates Docker, Kubernetes, CI/CD (GitHub Actions), and temporary public access via ngrok.
 
-![Wisecow Screenshot](screenshots/Screenshot 2025-09-19 203944.png)
+![Wisecow Screenshot](screenshots/wisecow_screenshot.png)
+
 
 🌟 Features
 | Feature                     | Description                                                                                       | Icon |
