@@ -1,4 +1,4 @@
-🐄 Wisecow App
+#### 1.🐄 Wisecow App
 
 A Wisdom server that returns random quotes using fortune and cowsay. This project demonstrates Docker, Kubernetes, CI/CD (GitHub Actions), and temporary public access via ngrok.
 
@@ -162,7 +162,7 @@ DOCKER_USERNAME	Docker Hub login
 DOCKER_PASSWORD	Docker Hub password/token
 NGROK_AUTH_TOKEN	ngrok public tunnel
 
-# Wisecow Project - KubeArmor Zero-Trust Demonstration
+#### 2. Wisecow Project - KubeArmor Zero-Trust Demonstration
 
 ## Screenshots & KubeArmor Explanation
 
@@ -194,3 +194,19 @@ Even though WSL2 cannot enforce LSM hooks, this setup demonstrates:
 - How to define a **zero-trust policy** in KubeArmor  
 - How the policy **restricts file, network, and process actions**  
 - How to **monitor violations** on a full Linux system
+
+
+### 3. PS2 Scripts
+
+This folder contains two Python scripts for system and application monitoring:
+
+1. **app_health_checker.py**  
+   - Checks the health/status of the Wisecow application.  
+   - Verifies if the app is running and logs any issues.  
+
+2. **system_health.py**  
+   - Monitors system health metrics (CPU, memory, disk usage).  
+   - Logs system performance and alerts if thresholds are exceeded.
+
+#### Logs
+- `system_health.log` contains the output of the system health checks.
