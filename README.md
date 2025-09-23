@@ -161,3 +161,36 @@ Secret Name	Purpose
 DOCKER_USERNAME	Docker Hub login
 DOCKER_PASSWORD	Docker Hub password/token
 NGROK_AUTH_TOKEN	ngrok public tunnel
+
+# Wisecow Project - KubeArmor Zero-Trust Demonstration
+
+## Screenshots & KubeArmor Explanation
+
+### 1. KubeArmor Policy
+![KubeArmor Policy](screenshots/kubearmor-policy.png)
+
+**Explanation:**  
+This screenshot shows the **zero-trust KubeArmor policy** applied to the Wisecow pod. The policy is configured to:
+
+- **Block file access:** Any attempt to create or modify files under `/tmp/*` will be blocked.
+- **Block network activity:** All TCP connections from the pod are blocked.
+- **Block process execution:** Prevents running `/usr/local/bin/node` directly inside the container.
+
+> **Note:** On **WSL2**, KubeArmor runs in **Audit mode**, so it does **not enforce the policy**, but logs would normally show any violations if run on a full Linux system with AppArmor/SELinux enabled.
+
+---
+
+### 2. Wisecow Application
+![Wisecow App](screenshots/wisecow_screenshot.png)
+
+**Explanation:**  
+This screenshot shows the **Wisecow application** running in the Kubernetes cluster. Any unauthorized file, network, or process actions would trigger a violation according to the zero-trust policy.
+
+---
+
+### 💡 Summary
+Even though WSL2 cannot enforce LSM hooks, this setup demonstrates:
+
+- How to define a **zero-trust policy** in KubeArmor  
+- How the policy **restricts file, network, and process actions**  
+- How to **monitor violations** on a full Linux system
