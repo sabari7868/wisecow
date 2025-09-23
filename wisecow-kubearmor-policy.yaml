@@ -1,0 +1,22 @@
+apiVersion: security.kubearmor.com/v1
+kind: KubeArmorPolicy
+metadata:
+  name: wisecow-zero-trust
+  namespace: default
+spec:
+  selector: {}   # leave empty for this CRD version
+  process:
+    matchPaths:
+      - path: "/usr/bin/node"
+        action: Allow
+      - path: "/app/server.js"
+        action: Allow
+  file:
+    matchPaths:
+      - path: "/app/*"
+        action: Allow
+  network:
+    matchPaths:
+      - path: "0.0.0.0/0:3000"
+        action: Allow
+
