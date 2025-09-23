@@ -181,7 +181,7 @@ This screenshot shows the **zero-trust KubeArmor policy** applied to the Wisecow
 ---
 
 ### 2. Wisecow Application
-![Wisecow App](screenshots/wisecow_screenshot.png)
+![Wisecow App](screenshots/kubearmor-describe.png)
 
 **Explanation:**  
 This screenshot shows the **Wisecow application** running in the Kubernetes cluster. Any unauthorized file, network, or process actions would trigger a violation according to the zero-trust policy.
